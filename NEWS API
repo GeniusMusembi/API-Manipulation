@@ -1,0 +1,55 @@
+import tkinter as tk
+from tkinter import scrolledtext
+import requests
+
+
+# Replace 'YOUR_API_KEY' with your actual News API key
+API_KEY = 'YOUR_API_KEY'
+
+
+def get_news(api_key, country='us', category='general', page_size=100):
+    endpoint = 'https://newsapi.org/v2/top-headlines'
+    params = {
+        'apiKey': api_key,
+        'country': country,
+        'category': category,
+        'pageSize': page_size,
+    }
+    try:
+        response = requests.get(endpoint, params=params)
+        data = response.json()
+        if 'articles' in data:
+            return data['articles']
+        else:
+            print("Error:", data)
+            return None
+    except Exception as e:
+        print("Error:", e)
+        return None
+
+
+def display_news_in_window(articles):
+    # Create the main window
+    window = tk.Tk()
+    window.title("LATEST NEWS")
+    # Create a scrolled text widget to display news
+    news_text = scrolledtext.ScrolledText(window,)
+    news_text.pack(expand='True',fill='both')  # Add some padding
+    # Populate the scrolled text widget with news content
+    if articles:
+        for i, article in enumerate(articles, 1):
+            news_text.insert(tk.END, f"\n--- Article {i} ---\n")
+            news_text.insert(tk.END, f"Title: {article['title']}\n")
+            news_text.insert(tk.END, f"Author: {article['author']}\n")
+            news_text.insert(tk.END, f"Description: {article['description']}\n")
+            news_text.insert(tk.END, f"URL: {article['url']}\n")
+            news_text.insert(tk.END, f"Published At: {article['publishedAt']}\n\n")
+    else:
+        news_text.insert(tk.END, "No news articles available.")
+    # Run the main loop
+    window.mainloop()
+
+
+if __name__ == "__main__":
+    news_articles = get_news(API_KEY, country='us', category='technology', page_size=100)
+    display_news_in_window(news_articles)
